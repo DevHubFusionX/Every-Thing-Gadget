@@ -178,6 +178,7 @@
     let deleteModal;
     let currentProductId;
     let categories = [];
+    let productsData = []; // Store products data globally
     const apiBaseUrl = '/api';
     
     // Initialize the page
@@ -280,6 +281,7 @@
         }
         const data = await response.json();
         const products = data.products || data;
+        productsData = products; // Store globally
         
         adminPanel.innerHTML = `
           <div class="d-flex justify-content-between align-items-center mb-4">
@@ -341,7 +343,7 @@
           btn.addEventListener('click', () => showDeleteModal(btn.dataset.id, btn.dataset.name));
         });
         
-        // Add event listener for category filter
+        // Add event listener for category filter - only on change, not input
         document.getElementById('category-filter').addEventListener('change', filterProductsByCategory);
       } catch (error) {
         adminPanel.innerHTML = `<div class="alert alert-danger">Error loading products: ${error.message}</div>`;
@@ -553,8 +555,17 @@
       }
     }
     
+    // Debounce function to prevent rapid execution
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
+    
     // Filter products by selected category
-    function filterProductsByCategory() {
+    const filterProductsByCategory = debounce(function() {
       const categoryId = document.getElementById('category-filter').value;
       const rows = document.querySelectorAll('tbody tr');
       
@@ -569,13 +580,13 @@
         }
       });
       
-      // Update the count of visible products
+      // Update the count of visible products without changing heading structure
       const visibleCount = Array.from(rows).filter(row => row.style.display !== 'none').length;
       const countElement = document.querySelector('.d-flex.justify-content-between.align-items-center.mb-4 h2');
       if (countElement) {
         countElement.textContent = `Products Management (${visibleCount} shown)`;
       }
-    }
+    }, 100);
     
     // Set the active navigation item
     function setActiveNavItem(id) {
