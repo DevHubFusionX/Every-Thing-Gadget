@@ -344,7 +344,7 @@
                          onerror="this.src='/uploads/sample-phone.jpg'">
                   </td>
                   <td>${p.name}</td>
-                  <td>${parseFloat(p.price).toFixed(2)}</td>
+                  <td>$${parseFloat(p.price).toFixed(2)}</td>
                   <td>${p.category || 'N/A'}</td>
                   <td>${p.stock_quantity || 0}</td>
                   <td class="action-buttons">
@@ -374,9 +374,6 @@
         categoryFilter.removeEventListener('change', filterProductsByCategory);
         // Add new event listener
         categoryFilter.addEventListener('change', filterProductsByCategory);
-      }
-      } catch (error) {
-        adminPanel.innerHTML = `<div class="alert alert-danger">Error loading products: ${error.message}</div>`;
       }
     }
     
@@ -585,15 +582,6 @@
       }
     }
     
-    // Debounce function to prevent rapid execution
-    function debounce(func, wait) {
-      let timeout;
-      return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-      };
-    }
-    
     // Filter products by selected category - completely rewritten
     function filterProductsByCategory() {
       // Get the selected category ID
@@ -622,7 +610,7 @@
                  onerror="this.src='/uploads/sample-phone.jpg'">
           </td>
           <td>${p.name}</td>
-          <td>${parseFloat(p.price).toFixed(2)}</td>
+          <td>$${parseFloat(p.price).toFixed(2)}</td>
           <td>${p.category || 'N/A'}</td>
           <td>${p.stock_quantity || 0}</td>
           <td class="action-buttons">
