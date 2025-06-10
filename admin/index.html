@@ -275,6 +275,9 @@
         
         // Load products
         const response = await fetch(`${apiBaseUrl}/products`);
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
         const data = await response.json();
         const products = data.products || data;
         
@@ -302,10 +305,10 @@
                   <tr>
                     <td>${p.id}</td>
                     <td>
-                      <img src="${p.image_url || '/products/default-product.jpg'}" 
+                      <img src="${p.image_url || '/uploads/sample-phone.jpg'}" 
                            alt="${p.name}" 
                            class="product-image"
-                           onerror="this.src='/products/default-product.jpg'">
+                           onerror="this.src='/uploads/sample-phone.jpg'">
                     </td>
                     <td>${p.name}</td>
                     <td>$${parseFloat(p.price).toFixed(2)}</td>
@@ -339,10 +342,15 @@
     async function loadCategories() {
       try {
         const response = await fetch(`${apiBaseUrl}/categories`);
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
         categories = await response.json();
         
         // Populate the category dropdown
         const categorySelect = document.getElementById('product-category');
+        if (!categorySelect) return; // Skip if element doesn't exist yet
+        
         categorySelect.innerHTML = '<option value="">Select Category</option>';
         categories.forEach(category => {
           const option = document.createElement('option');
@@ -363,7 +371,12 @@
       adminPanel.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p>Loading categories...</p></div>';
       
       fetch(`${apiBaseUrl}/categories`)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP error ${res.status}`);
+          }
+          return res.json();
+        })
         .then(categories => {
           adminPanel.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-4">
