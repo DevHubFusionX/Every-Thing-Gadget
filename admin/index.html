@@ -275,8 +275,16 @@
                 <textarea class="form-control" id="product-description" rows="3"></textarea>
               </div>
               <div class="mb-3">
-                <label for="product-image" class="form-label">Image URL</label>
-                <input type="text" class="form-control" id="product-image">
+                <label for="product-image" class="form-label">Product Image</label>
+                <div class="input-group">
+                  <input type="file" class="form-control" id="product-image-file" accept="image/*">
+                  <button class="btn btn-outline-secondary" type="button" id="upload-image-btn">Upload</button>
+                </div>
+                <input type="hidden" id="product-image" value="">
+                <div id="image-preview" class="mt-2" style="display: none;">
+                  <img src="" alt="Preview" style="max-width: 200px; max-height: 200px;">
+                </div>
+                <div id="upload-status" class="mt-2"></div>
               </div>
               <div class="mb-3">
                 <label for="product-sku" class="form-label">SKU</label>
@@ -563,6 +571,11 @@
         btn.addEventListener('click', () => showDeleteModal(btn.dataset.id, btn.dataset.name));
       });
       
+      // Add event listener for image upload button
+      if (document.getElementById('upload-image-btn')) {
+        document.getElementById('upload-image-btn').addEventListener('click', uploadProductImage);
+      }
+      
       // Add event listener for category filter - only on change, not input
       const categoryFilter = document.getElementById('category-filter');
       if (categoryFilter) {
@@ -667,10 +680,15 @@
     function showProductModal(product = null) {
       const modalTitle = document.getElementById('productModalLabel');
       const productForm = document.getElementById('product-form');
+      const imagePreview = document.getElementById('image-preview');
+      const imagePreviewImg = imagePreview.querySelector('img');
       
       // Reset the form
       productForm.reset();
       document.getElementById('product-id').value = '';
+      document.getElementById('product-image').value = '';
+      imagePreview.style.display = 'none';
+      document.getElementById('upload-status').innerHTML = '';
       
       if (product) {
         // Edit mode
@@ -683,12 +701,58 @@
         document.getElementById('product-description').value = product.description || '';
         document.getElementById('product-image').value = product.image_url || '';
         document.getElementById('product-sku').value = product.sku || '';
+        
+        // Show image preview if available
+        if (product.image_url) {
+          imagePreviewImg.src = product.image_url;
+          imagePreview.style.display = 'block';
+        }
       } else {
         // Add mode
         modalTitle.textContent = 'Add New Product';
       }
       
       productModal.show();
+    }
+    
+    // Upload product image
+    async function uploadProductImage() {
+      const fileInput = document.getElementById('product-image-file');
+      const uploadStatus = document.getElementById('upload-status');
+      const imagePreview = document.getElementById('image-preview');
+      const imagePreviewImg = imagePreview.querySelector('img');
+      const imageUrlInput = document.getElementById('product-image');
+      
+      if (!fileInput.files || fileInput.files.length === 0) {
+        uploadStatus.innerHTML = '<div class="alert alert-warning">Please select a file first</div>';
+        return;
+      }
+      
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      uploadStatus.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Uploading...';
+      
+      try {
+        const response = await fetch(`${apiBaseUrl}/upload-image`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          uploadStatus.innerHTML = '<div class="alert alert-success">Image uploaded successfully</div>';
+          imageUrlInput.value = result.filePath;
+          imagePreviewImg.src = result.filePath;
+          imagePreview.style.display = 'block';
+        } else {
+          uploadStatus.innerHTML = `<div class="alert alert-danger">Error: ${result.message}</div>`;
+        }
+      } catch (error) {
+        uploadStatus.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+      }
     }
     
     // Show the delete confirmation modal

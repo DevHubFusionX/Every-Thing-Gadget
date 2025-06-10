@@ -1,6 +1,62 @@
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/db');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure multer storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../uploads');
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, uniqueSuffix + ext);
+  }
+});
+
+// File filter
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Not an image! Please upload only images.'), false);
+  }
+};
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+// Image upload route
+router.post('/upload-image', upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: true, message: 'No file uploaded' });
+    }
+    
+    // Return the file path that can be stored in the product's image_url
+    const filename = path.basename(req.file.path);
+    const filePath = `/uploads/${filename}`;
+    
+    res.json({
+      success: true,
+      filePath: filePath,
+      message: 'Image uploaded successfully'
+    });
+  } catch (error) {
+    res.status(500).json({ error: true, message: error.message });
+  }
+});
 
 // GET all products with filtering, sorting, pagination
 router.get('/products', async (req, res) => {
