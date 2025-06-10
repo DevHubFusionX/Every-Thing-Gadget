@@ -50,7 +50,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav" id="nav-items">
+          <ul class="navbar-nav" id="nav-items" style="display: none;">
             <li class="nav-item">
               <a class="nav-link active" href="#" id="products-nav">Products</a>
             </li>
@@ -213,15 +213,25 @@
     // Update the authentication navigation
     function updateAuthNav(isLoggedIn) {
       const authNav = document.getElementById('auth-nav');
+      const navItems = document.getElementById('nav-items');
+      
       if (isLoggedIn) {
+        // Show logout button
         authNav.innerHTML = `
           <li class="nav-item">
             <a class="nav-link" href="#" id="logout-link">Logout</a>
           </li>
         `;
         document.getElementById('logout-link').addEventListener('click', handleLogout);
+        
+        // Show navigation items
+        navItems.style.display = 'flex';
       } else {
+        // Hide logout button
         authNav.innerHTML = '';
+        
+        // Hide navigation items
+        navItems.style.display = 'none';
       }
     }
     
