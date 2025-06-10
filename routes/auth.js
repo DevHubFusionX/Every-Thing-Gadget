@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../server');
+const { pool } = require('../config/db');
 const crypto = require('crypto');
 
 // Helper function to hash passwords

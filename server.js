@@ -40,9 +40,13 @@ app.get('/api', (req, res) => {
 });
 
 // Routes
-app.use('/api', require('./routes/products'));
-app.use('/api', require('./routes/categories'));
-app.use('/api', require('./routes/auth'));
+const productsRouter = require('./routes/products');
+const categoriesRouter = require('./routes/categories');
+const authRouter = require('./routes/auth');
+
+app.use('/api', productsRouter);
+app.use('/api', categoriesRouter);
+app.use('/api', authRouter);
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

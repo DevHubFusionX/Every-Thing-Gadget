@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../server');
+const { pool } = require('../config/db');
 
 // GET all categories
 router.get('/categories', async (req, res) => {

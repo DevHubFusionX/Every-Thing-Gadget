@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../server');
+const { pool } = require('../config/db');
 
 // GET all products with filtering, sorting, pagination
 router.get('/products', async (req, res) => {
