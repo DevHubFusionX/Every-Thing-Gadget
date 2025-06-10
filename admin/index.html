@@ -5,39 +5,145 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Everything-Tech Admin Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
   <style>
+    :root {
+      --primary-color: #2563eb;
+      --secondary-color: #1e40af;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --light-bg: #f8fafc;
+      --dark-text: #1e293b;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
     body { 
       padding-top: 20px; 
-      background-color: #f8f9fa;
+      background-color: var(--light-bg);
+      color: var(--dark-text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
+    
     .admin-container { 
       max-width: 1200px; 
       margin: 0 auto;
       background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
     }
+    
     .navbar-brand {
       font-weight: bold;
+      color: var(--primary-color) !important;
     }
+    
     .form-container {
-      max-width: 600px;
-      margin: 0 auto;
+      max-width: 450px;
+      margin: 2rem auto;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      background-color: white;
     }
+    
     .action-buttons {
       white-space: nowrap;
     }
+    
     .table-responsive {
       margin-top: 20px;
+      border-radius: var(--border-radius);
+      overflow: hidden;
     }
+    
+    .table {
+      margin-bottom: 0;
+    }
+    
+    .table thead th {
+      border-top: none;
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
     .alert {
       margin-top: 20px;
+      border-radius: var(--border-radius);
     }
+    
     .product-image {
-      max-width: 100px;
-      max-height: 100px;
+      max-width: 80px;
+      max-height: 80px;
       object-fit: contain;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--secondary-color);
+      border-color: var(--secondary-color);
+    }
+    
+    .btn-success {
+      background-color: var(--success-color);
+      border-color: var(--success-color);
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+      border-color: var(--danger-color);
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+    }
+    
+    /* Animation for login error */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .shake {
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    
+    /* Card styling */
+    .card {
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      border: none;
+      transition: transform 0.2s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    
+    /* Modal styling */
+    .modal-content {
+      border-radius: var(--border-radius);
+      border: none;
+    }
+    
+    .modal-header {
+      background-color: var(--primary-color);
+      color: white;
+      border-top-left-radius: var(--border-radius);
+      border-top-right-radius: var(--border-radius);
+    }
+    
+    .modal-header .btn-close {
+      filter: brightness(0) invert(1);
     }
   </style>
 </head>
@@ -66,18 +172,29 @@
     </nav>
 
     <div id="login-form">
-      <h2>Admin Login</h2>
       <div class="form-container">
+        <div class="text-center mb-4">
+          <h2 class="mb-3">Admin Dashboard</h2>
+          <p class="text-muted">Please sign in to continue</p>
+        </div>
         <form id="admin-login-form">
           <div class="mb-3">
             <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" required>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+              <input type="text" class="form-control" id="username" placeholder="Enter username" required>
+            </div>
           </div>
-          <div class="mb-3">
+          <div class="mb-4">
             <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" required>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+              <input type="password" class="form-control" id="password" placeholder="Enter password" required>
+            </div>
           </div>
-          <button type="submit" class="btn btn-primary">Login</button>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg">Login</button>
+          </div>
         </form>
       </div>
     </div>
@@ -241,6 +358,12 @@
       e.preventDefault();
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
+      const loginBtn = document.querySelector('#admin-login-form button[type="submit"]');
+      const originalBtnText = loginBtn.innerHTML;
+      
+      // Show loading state
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging in...';
       
       try {
         const response = await fetch(`${apiBaseUrl}/login`, {
@@ -258,11 +381,40 @@
           loadProductsPanel();
           updateAuthNav(true);
         } else {
-          showAlert('danger', `Login failed: ${data.message || 'Invalid credentials'}`);
+          // Show specific error message from server or default message
+          const errorMsg = data.message || 'Invalid username or password';
+          showLoginError(errorMsg);
         }
       } catch (error) {
-        showAlert('danger', `Error: ${error.message}`);
+        showLoginError('Connection error. Please try again.');
+      } finally {
+        // Restore button state
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = originalBtnText;
       }
+    }
+    
+    // Show login error message
+    function showLoginError(message) {
+      const loginForm = document.getElementById('admin-login-form');
+      
+      // Remove any existing error message
+      const existingError = loginForm.querySelector('.login-error');
+      if (existingError) {
+        existingError.remove();
+      }
+      
+      // Create and add new error message
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'alert alert-danger mt-3 login-error';
+      errorDiv.textContent = message;
+      loginForm.appendChild(errorDiv);
+      
+      // Shake the form to indicate error
+      loginForm.classList.add('shake');
+      setTimeout(() => {
+        loginForm.classList.remove('shake');
+      }, 500);
     }
     
     // Handle logout
@@ -559,7 +711,16 @@
         if (response.ok) {
           productModal.hide();
           showAlert('success', isEdit ? 'Product updated successfully!' : 'Product created successfully!');
-          loadProductsPanel();
+          
+          // Refresh products data immediately
+          const productsResponse = await fetch(`${apiBaseUrl}/products`);
+          if (productsResponse.ok) {
+            const data = await productsResponse.json();
+            productsData = data.products || data;
+            renderProductsTable(productsData);
+          } else {
+            loadProductsPanel(); // Fallback to full reload
+          }
         } else {
           showAlert('danger', `Error: ${result.message || 'Failed to save product'}`, 'productModal');
         }
