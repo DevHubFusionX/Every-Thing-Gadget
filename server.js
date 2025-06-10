@@ -51,6 +51,9 @@ app.use('/api', authRouter);
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve admin dashboard
+app.use('/admin', express.static(path.join(__dirname, 'admin')));
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
