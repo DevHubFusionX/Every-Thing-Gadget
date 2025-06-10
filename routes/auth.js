@@ -20,9 +20,9 @@ router.post('/login', async (req, res) => {
     // Hash the password for comparison
     const hashedPassword = hashPassword(password);
     
-    // Check if user exists with these credentials - removed email field
+    // Check if user exists with these credentials - removed role field
     const [users] = await pool.query(
-      'SELECT id, username, role FROM users WHERE username = ? AND password = ?',
+      'SELECT id, username FROM users WHERE username = ? AND password = ?',
       [username, hashedPassword]
     );
     
@@ -32,19 +32,15 @@ router.post('/login', async (req, res) => {
     
     const user = users[0];
     
-    // Generate a simple token (in production, use JWT)
+    // Generate a simple token
     const token = crypto.randomBytes(32).toString('hex');
-    
-    // Store token in database (in a real app, you'd use Redis or a token table)
-    // For this example, we'll just return the token
     
     res.json({
       success: true,
       message: 'Login successful',
       user: {
         id: user.id,
-        username: user.username,
-        role: user.role
+        username: user.username
       },
       token: token
     });
@@ -62,7 +58,7 @@ router.post('/create-admin', async (req, res) => {
       return res.status(400).json({ error: true, message: 'Username and password are required' });
     }
     
-    // Check if user already exists - removed email check
+    // Check if user already exists
     const [existingUsers] = await pool.query(
       'SELECT id FROM users WHERE username = ?',
       [username]
@@ -75,10 +71,10 @@ router.post('/create-admin', async (req, res) => {
     // Hash the password
     const hashedPassword = hashPassword(password);
     
-    // Insert the new admin user - removed email field
+    // Insert the new admin user - removed role field
     const [result] = await pool.query(
-      'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
-      [username, hashedPassword, 'admin']
+      'INSERT INTO users (username, password) VALUES (?, ?)',
+      [username, hashedPassword]
     );
     
     res.status(201).json({
