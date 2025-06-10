@@ -1,0 +1,18 @@
+# Main .htaccess file for the backend
+RewriteEngine On
+
+# Allow direct access to uploads directory
+<IfModule mod_headers.c>
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+</IfModule>
+
+# Redirect API requests to the api directory
+RewriteRule ^api/?(.*)$ api/$1 [L,QSA]
+
+# Redirect admin requests to the admin directory
+RewriteRule ^admin/?(.*)$ admin/$1 [L,QSA]
+
+# Default to index.php
+RewriteRule ^$ api/index.php [L,QSA]

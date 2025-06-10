@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Request Comparison</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { display: flex; }
+        .column { flex: 1; margin: 10px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        pre { background: #f5f5f5; padding: 10px; overflow: auto; }
+        button { padding: 10px; margin: 5px; cursor: pointer; }
+        h2 { color: #333; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Delete Request Comparison Tool</h1>
+    <p>This tool compares the working test delete flow with the admin dashboard delete flow</p>
+    
+    <div class="container">
+        <div class="column">
+            <h2>Test Delete Flow (Working)</h2>
+            <input type="number" id="test-product-id" value="6" placeholder="Product ID">
+            <button onclick="runTestDelete()">Run Test Delete</button>
+            <div id="test-result"></div>
+        </div>
+        
+        <div class="column">
+            <h2>Admin Dashboard Delete (Not Working)</h2>
+            <input type="number" id="admin-product-id" value="6" placeholder="Product ID">
+            <button onclick="runAdminDelete()">Run Admin Delete</button>
+            <div id="admin-result"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Test Delete Flow (Working version)
+        async function runTestDelete() {
+            const resultDiv = document.getElementById('test-result');
+            const productId = document.getElementById('test-product-id').value;
+            
+            resultDiv.innerHTML = '<p>Running test delete...</p>';
+            
+            try {
+                const url = '../api/products.php';
+                
+                // Create form data for delete operation using FormData
+                const formData = new FormData();
+                formData.append('action', 'delete');
+                formData.append('id', productId);
+                
+                // Convert FormData to URL encoded string
+                const urlEncodedData = new URLSearchParams(formData).toString();
+                
+                // Log request details
+                const requestDetails = `
+                    <h3>Request Details:</h3>
+                    <pre>URL: ${url}
+Method: POST
+Headers: Content-Type: application/x-www-form-urlencoded
+Body: ${urlEncodedData}</pre>
+                `;
+                
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: urlEncodedData,
+                });
+                
+                const text = await response.text();
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (error) {
+                    resultDiv.innerHTML = requestDetails + `
+                        <h3 class="error">JSON Parse Error:</h3>
+                        <pre>${error.message}</pre>
+                        <h3>Raw Response:</h3>
+                        <pre>${text}</pre>
+                    `;
+                    return;
+                }
+                
+                const responseClass = response.ok && data.success ? 'success' : 'error';
+                
+                resultDiv.innerHTML = requestDetails + `
+                    <h3>Response Status: <span class="${responseClass}">${response.status}</span></h3>
+                    <h3>Response Headers:</h3>
+                    <pre>${formatHeaders(response.headers)}</pre>
+                    <h3>Response Data:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<h3 class="error">Error: ${error.message}</h3>`;
+            }
+        }
+        
+        // Admin Dashboard Delete (Problem version)
+        async function runAdminDelete() {
+            const resultDiv = document.getElementById('admin-result');
+            const productId = document.getElementById('admin-product-id').value;
+            
+            resultDiv.innerHTML = '<p>Running admin delete...</p>';
+            
+            try {
+                const url = '../api/products.php';
+                
+                // Create form data for delete operation - EXACTLY like the admin dashboard
+                const formData = new FormData();
+                formData.append('action', 'delete');
+                formData.append('id', productId);
+                
+                // Convert FormData to URL encoded string
+                const urlEncodedData = new URLSearchParams(formData).toString();
+                
+                // Log request details
+                const requestDetails = `
+                    <h3>Request Details:</h3>
+                    <pre>URL: ${url}
+Method: POST
+Headers: Content-Type: application/x-www-form-urlencoded
+Body: ${urlEncodedData}</pre>
+                `;
+                
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: urlEncodedData,
+                });
+                
+                const text = await response.text();
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (error) {
+                    resultDiv.innerHTML = requestDetails + `
+                        <h3 class="error">JSON Parse Error:</h3>
+                        <pre>${error.message}</pre>
+                        <h3>Raw Response:</h3>
+                        <pre>${text}</pre>
+                    `;
+                    return;
+                }
+                
+                const responseClass = response.ok && data.success ? 'success' : 'error';
+                
+                resultDiv.innerHTML = requestDetails + `
+                    <h3>Response Status: <span class="${responseClass}">${response.status}</span></h3>
+                    <h3>Response Headers:</h3>
+                    <pre>${formatHeaders(response.headers)}</pre>
+                    <h3>Response Data:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<h3 class="error">Error: ${error.message}</h3>`;
+            }
+        }
+        
+        // Helper function to format headers
+        function formatHeaders(headers) {
+            let result = '';
+            headers.forEach((value, key) => {
+                result += `${key}: ${value}\n`;
+            });
+            return result;
+        }
+    </script>
+</body>
+</html>

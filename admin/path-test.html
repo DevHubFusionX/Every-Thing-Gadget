@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Path Test</title>
+</head>
+<body>
+    <h1>API Path Test</h1>
+    <div id="results"></div>
+
+    <script>
+        async function testPaths() {
+            const paths = [
+                '/api/products.php',
+                '/backend/api/products.php',
+                '../api/products.php',
+                '../../api/products.php',
+                'https://everything-gadget.free.nf/api/products.php',
+                'https://everything-gadget.free.nf/backend/api/products.php'
+            ];
+
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Testing API Paths...</h2>';
+
+            for (const path of paths) {
+                try {
+                    console.log(`Testing: ${path}`);
+                    const response = await fetch(path);
+                    const text = await response.text();
+                    
+                    results.innerHTML += `
+                        <div style="border: 1px solid green; margin: 10px; padding: 10px;">
+                            <h3>✅ SUCCESS: ${path}</h3>
+                            <p>Status: ${response.status}</p>
+                            <p>Response length: ${text.length} characters</p>
+                            <details>
+                                <summary>Response preview</summary>
+                                <pre>${text.substring(0, 200)}...</pre>
+                            </details>
+                        </div>
+                    `;
+                    break; // Stop at first successful path
+                } catch (error) {
+                    results.innerHTML += `
+                        <div style="border: 1px solid red; margin: 10px; padding: 10px;">
+                            <h3>❌ FAILED: ${path}</h3>
+                            <p>Error: ${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Run test when page loads
+        testPaths();
+    </script>
+</body>
+</html>
