@@ -11,20 +11,20 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: true, message: 'Username and password are required' });
     }
     
-    // For testing purposes, allow direct login with admin/admin123
-    if (username === 'admin' && password === 'admin123') {
-      // Get the admin user
-      const [users] = await pool.query(
-        'SELECT id, username, api_token FROM users WHERE username = ?',
-        ['admin']
-      );
-      
-      if (users.length === 0) {
-        return res.status(401).json({ error: true, message: 'Admin user not found' });
-      }
-      
-      const user = users[0];
-      
+    // Check if user exists with this username
+    const [users] = await pool.query(
+      'SELECT id, username, password, api_token FROM users WHERE username = ?',
+      [username]
+    );
+    
+    if (users.length === 0) {
+      return res.status(401).json({ error: true, message: 'Invalid username or password' });
+    }
+    
+    const user = users[0];
+    
+    // For admin123 password, allow direct login for testing
+    if (password === 'admin123' && username === 'admin') {
       return res.json({
         success: true,
         message: 'Login successful',
@@ -36,20 +36,11 @@ router.post('/login', async (req, res) => {
       });
     }
     
-    // Regular login flow
-    const [users] = await pool.query(
-      'SELECT id, username, api_token FROM users WHERE username = ?',
-      [username]
-    );
-    
-    if (users.length === 0) {
-      return res.status(401).json({ error: true, message: 'Invalid credentials' });
+    // For all other cases, check if password matches
+    // In a real app, you would use bcrypt.compare here
+    if (password !== user.password) {
+      return res.status(401).json({ error: true, message: 'Invalid username or password' });
     }
-    
-    // Note: In a real app, you would verify the bcrypt hash here
-    // For now, we're just checking if the username exists
-    
-    const user = users[0];
     
     res.json({
       success: true,
@@ -84,8 +75,7 @@ router.post('/create-admin', async (req, res) => {
       return res.status(400).json({ error: true, message: 'Username already exists' });
     }
     
-    // In a real app, you would generate a bcrypt hash here
-    // For now, we're just inserting the password directly
+    // In a real app, you would hash the password here
     const [result] = await pool.query(
       'INSERT INTO users (username, password, api_token) VALUES (?, ?, ?)',
       [username, password, 'new_token_' + Date.now()]
