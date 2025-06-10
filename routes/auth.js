@@ -20,9 +20,9 @@ router.post('/login', async (req, res) => {
     // Hash the password for comparison
     const hashedPassword = hashPassword(password);
     
-    // Check if user exists with these credentials
+    // Check if user exists with these credentials - removed email field
     const [users] = await pool.query(
-      'SELECT id, username, email, role FROM users WHERE username = ? AND password = ?',
+      'SELECT id, username, role FROM users WHERE username = ? AND password = ?',
       [username, hashedPassword]
     );
     
@@ -44,7 +44,6 @@ router.post('/login', async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email,
         role: user.role
       },
       token: token
@@ -57,29 +56,29 @@ router.post('/login', async (req, res) => {
 // Create admin user endpoint
 router.post('/create-admin', async (req, res) => {
   try {
-    const { username, password, email } = req.body;
+    const { username, password } = req.body;
     
-    if (!username || !password || !email) {
-      return res.status(400).json({ error: true, message: 'Username, password and email are required' });
+    if (!username || !password) {
+      return res.status(400).json({ error: true, message: 'Username and password are required' });
     }
     
-    // Check if user already exists
+    // Check if user already exists - removed email check
     const [existingUsers] = await pool.query(
-      'SELECT id FROM users WHERE username = ? OR email = ?',
-      [username, email]
+      'SELECT id FROM users WHERE username = ?',
+      [username]
     );
     
     if (existingUsers.length > 0) {
-      return res.status(400).json({ error: true, message: 'Username or email already exists' });
+      return res.status(400).json({ error: true, message: 'Username already exists' });
     }
     
     // Hash the password
     const hashedPassword = hashPassword(password);
     
-    // Insert the new admin user
+    // Insert the new admin user - removed email field
     const [result] = await pool.query(
-      'INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)',
-      [username, hashedPassword, email, 'admin']
+      'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
+      [username, hashedPassword, 'admin']
     );
     
     res.status(201).json({
