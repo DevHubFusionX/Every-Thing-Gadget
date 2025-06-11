@@ -304,12 +304,13 @@ function renderProducts() {
         <button class="btn btn-sm btn-primary me-1" onclick="window.editProduct(${product.id})">
           <i class="bi bi-pencil"></i>
         </button>
-        <button class="btn btn-sm btn-danger" onclick="window.deleteProduct(${product.id}, '${product.name.replace(/'/g, "\\'").replace(/"/g, '\\"')}')">
+        <button class="btn btn-sm btn-danger" onclick="window.deleteProduct(${product.id}, '${product.name.replace(/'/g, "\\\\'").replace(/"/g, '\\\\"')}')">
           <i class="bi bi-trash"></i>
         </button>
       </td>
     </tr>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // Load categories
@@ -387,7 +388,7 @@ function renderCategories() {
         <button class="btn btn-sm btn-primary me-1" onclick="window.editCategory(${category.id})">
           <i class="bi bi-pencil"></i>
         </button>
-        <button class="btn btn-sm btn-danger" onclick="window.deleteCategory(${category.id}, '${category.name.replace(/'/g, "\\'").replace(/"/g, '\\"')}')">
+        <button class="btn btn-sm btn-danger" onclick="window.deleteCategory(${category.id}, '${category.name.replace(/'/g, "\\\\'").replace(/"/g, '\\\\"')}')">
           <i class="bi bi-trash"></i>
         </button>
       </td>
