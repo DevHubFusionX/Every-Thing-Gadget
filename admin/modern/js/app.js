@@ -87,17 +87,14 @@ async function handleLogin(e) {
   document.getElementById('password-error').textContent = '';
   
   // Get form values
-  const email = document.getElementById('email').value.trim();
+  const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
   
   // Validate form
   let isValid = true;
   
-  if (!email) {
-    document.getElementById('email-error').textContent = 'Email is required';
-    isValid = false;
-  } else if (!isValidEmail(email)) {
-    document.getElementById('email-error').textContent = 'Please enter a valid email';
+  if (!username) {
+    document.getElementById('username-error').textContent = 'Username is required';
     isValid = false;
   }
   
@@ -113,7 +110,7 @@ async function handleLogin(e) {
     const response = await fetch(`${apiBaseUrl}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ username, password })
     });
     
     const data = await response.json();
@@ -613,11 +610,7 @@ function showToast(title, message, type = 'primary') {
   toast.show();
 }
 
-// Validate email format
-function isValidEmail(email) {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(email);
-}
+// No longer needed email validation
 
 // Make functions available globally
 window.editProduct = editProduct;
