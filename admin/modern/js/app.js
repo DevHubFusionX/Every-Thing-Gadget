@@ -476,34 +476,56 @@ async function saveProduct() {
   // Handle image upload
   const imageFile = document.getElementById('product-image').files[0];
   if (imageFile) {
-    // In a real implementation, you would upload the image to a server
-    // and get back a URL to store in the product data
-    // For this example, we'll just use a placeholder
-    productData.image_url = URL.createObjectURL(imageFile);
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    
+    try {
+      const uploadResponse = await fetch(`${apiBaseUrl}/upload-image`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+      });
+      
+      if (uploadResponse.ok) {
+        const uploadResult = await uploadResponse.json();
+        if (uploadResult.filePath) {
+          productData.image_url = uploadResult.filePath;
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
   }
   
   try {
-    // In a real implementation, you would send this data to your API
-    // For this example, we'll just update the local data
+    let url = `${apiBaseUrl}/product`;
+    let method = 'POST';
     
     if (isEdit) {
-      // Update existing product
-      const index = productsData.findIndex(p => p.id == productId);
-      if (index !== -1) {
-        productsData[index] = { ...productsData[index], ...productData };
-      }
-    } else {
-      // Add new product
-      const newProduct = {
-        id: Date.now(), // Generate a temporary ID
-        ...productData
-      };
-      productsData.push(newProduct);
+      url = `${apiBaseUrl}/product/${productId}`;
+      method = 'PUT';
     }
+    
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+      },
+      body: JSON.stringify(productData)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+    
+    // Reload products
+    await loadProducts();
     
     // Close modal and update UI
     productModal.hide();
-    renderProducts();
     
     // Update dashboard stats
     document.getElementById('products-count').textContent = productsData.length;
@@ -528,28 +550,32 @@ async function saveCategory() {
   };
   
   try {
-    // In a real implementation, you would send this data to your API
-    // For this example, we'll just update the local data
+    let url = `${apiBaseUrl}/category`;
+    let method = 'POST';
     
     if (isEdit) {
-      // Update existing category
-      const index = categoriesData.findIndex(c => c.id == categoryId);
-      if (index !== -1) {
-        categoriesData[index] = { ...categoriesData[index], ...categoryData };
-      }
-    } else {
-      // Add new category
-      const newCategory = {
-        id: Date.now(), // Generate a temporary ID
-        ...categoryData
-      };
-      categoriesData.push(newCategory);
+      url = `${apiBaseUrl}/category/${categoryId}`;
+      method = 'PUT';
     }
+    
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+      },
+      body: JSON.stringify(categoryData)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+    
+    // Reload categories
+    await loadCategories();
     
     // Close modal and update UI
     categoryModal.hide();
-    renderCategories();
-    updateCategoryDropdown();
     
     // Update dashboard stats
     document.getElementById('categories-count').textContent = categoriesData.length;
@@ -563,10 +589,25 @@ async function saveCategory() {
 }
 
 // Edit product
-function editProduct(id) {
-  const product = productsData.find(p => p.id == id);
-  if (product) {
-    showProductModal(product);
+async function editProduct(id) {
+  try {
+    const response = await fetch(`${apiBaseUrl}/product/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+    
+    const product = await response.json();
+    if (product) {
+      showProductModal(product);
+    }
+  } catch (error) {
+    console.error('Error loading product details:', error);
+    showToast('Error', 'Failed to load product details', 'danger');
   }
 }
 
@@ -579,10 +620,25 @@ function deleteProduct(id, name) {
 }
 
 // Edit category
-function editCategory(id) {
-  const category = categoriesData.find(c => c.id == id);
-  if (category) {
-    showCategoryModal(category);
+async function editCategory(id) {
+  try {
+    const response = await fetch(`${apiBaseUrl}/category/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+    
+    const category = await response.json();
+    if (category) {
+      showCategoryModal(category);
+    }
+  } catch (error) {
+    console.error('Error loading category details:', error);
+    showToast('Error', 'Failed to load category details', 'danger');
   }
 }
 
@@ -597,25 +653,45 @@ function deleteCategory(id, name) {
 // Confirm delete
 async function confirmDelete() {
   try {
+    let url;
+    let reloadFunction;
+    let successMessage;
+    
     if (currentItemType === 'product') {
-      // Delete product
-      productsData = productsData.filter(p => p.id != currentItemId);
-      renderProducts();
-      document.getElementById('products-count').textContent = productsData.length;
-      showToast('Success', 'Product deleted successfully', 'success');
+      url = `${apiBaseUrl}/product/${currentItemId}`;
+      reloadFunction = loadProducts;
+      successMessage = 'Product deleted successfully';
     } else if (currentItemType === 'category') {
-      // Delete category
-      categoriesData = categoriesData.filter(c => c.id != currentItemId);
-      renderCategories();
-      updateCategoryDropdown();
-      document.getElementById('categories-count').textContent = categoriesData.length;
-      showToast('Success', 'Category deleted successfully', 'success');
+      url = `${apiBaseUrl}/category/${currentItemId}`;
+      reloadFunction = loadCategories;
+      successMessage = 'Category deleted successfully';
+    } else {
+      throw new Error('Unknown item type');
     }
     
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+    
+    // Reload data
+    await reloadFunction();
+    
+    // Update dashboard stats
+    document.getElementById('products-count').textContent = productsData.length;
+    document.getElementById('categories-count').textContent = categoriesData.length;
+    
+    showToast('Success', successMessage, 'success');
     deleteModal.hide();
   } catch (error) {
     console.error('Error deleting item:', error);
-    showToast('Error', 'Failed to delete item', 'danger');
+    showToast('Error', 'Failed to delete item: ' + error.message, 'danger');
   }
 }
 
