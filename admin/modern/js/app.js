@@ -83,7 +83,10 @@ async function handleLogin(e) {
   
   // Clear previous errors
   loginError.style.display = 'none';
-  document.getElementById('email-error').textContent = '';
+  const usernameError = document.getElementById('username-error');
+  if (usernameError) {
+    usernameError.textContent = '';
+  }
   document.getElementById('password-error').textContent = '';
   
   // Get form values
@@ -94,7 +97,10 @@ async function handleLogin(e) {
   let isValid = true;
   
   if (!username) {
-    document.getElementById('username-error').textContent = 'Username is required';
+    const usernameError = document.getElementById('username-error');
+    if (usernameError) {
+      usernameError.textContent = 'Username is required';
+    }
     isValid = false;
   }
   
