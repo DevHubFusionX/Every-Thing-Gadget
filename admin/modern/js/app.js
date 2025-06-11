@@ -669,6 +669,9 @@ async function confirmDelete() {
       throw new Error('Unknown item type');
     }
     
+    console.log(`Deleting ${currentItemType} with ID: ${currentItemId}`);
+    console.log(`DELETE request to: ${url}`);
+    
     const response = await fetch(url, {
       method: 'DELETE',
       headers: {
@@ -676,8 +679,11 @@ async function confirmDelete() {
       }
     });
     
+    const responseText = await response.text();
+    console.log('Delete response:', responseText);
+    
     if (!response.ok) {
-      throw new Error(`HTTP error ${response.status}`);
+      throw new Error(`HTTP error ${response.status}: ${responseText}`);
     }
     
     // Reload data
