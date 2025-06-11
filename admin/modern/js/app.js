@@ -216,24 +216,27 @@ async function loadProducts(silent = false) {
   }
   
   try {
-    const response = await fetch(`${apiBaseUrl}/products`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-      }
-    });
+    console.log('Fetching products from:', `${apiBaseUrl}/products`);
+    const response = await fetch(`${apiBaseUrl}/products`);
     
     if (!response.ok) {
-      if (response.status === 401) {
-        // Unauthorized, redirect to login
-        handleLogout();
-        return;
-      }
       throw new Error(`HTTP error ${response.status}`);
     }
     
-    const data = await response.json();
+    const responseText = await response.text();
+    console.log('Products response:', responseText);
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Failed to parse products response:', e);
+      throw new Error('Invalid response format');
+    }
+    
     // Ensure productsData is always an array
     productsData = Array.isArray(data) ? data : (data.products || []);
+    console.log('Processed products data:', productsData);
     
     if (!silent) {
       renderProducts();
@@ -301,24 +304,27 @@ async function loadCategories(silent = false) {
   }
   
   try {
-    const response = await fetch(`${apiBaseUrl}/categories`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-      }
-    });
+    console.log('Fetching categories from:', `${apiBaseUrl}/categories`);
+    const response = await fetch(`${apiBaseUrl}/categories`);
     
     if (!response.ok) {
-      if (response.status === 401) {
-        // Unauthorized, redirect to login
-        handleLogout();
-        return;
-      }
       throw new Error(`HTTP error ${response.status}`);
     }
     
-    const data = await response.json();
+    const responseText = await response.text();
+    console.log('Categories response:', responseText);
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Failed to parse categories response:', e);
+      throw new Error('Invalid response format');
+    }
+    
     // Ensure categoriesData is always an array
     categoriesData = Array.isArray(data) ? data : (data.categories || []);
+    console.log('Processed categories data:', categoriesData);
     
     if (!silent) {
       renderCategories();
