@@ -473,33 +473,33 @@ async function saveProduct() {
     description: document.getElementById('product-description').value
   };
   
-  // Handle image upload
-  const imageFile = document.getElementById('product-image').files[0];
-  if (imageFile) {
-    const formData = new FormData();
-    formData.append('image', imageFile);
-    
-    try {
+  try {
+    // Handle image upload first
+    const imageFile = document.getElementById('product-image').files[0];
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      
+      console.log('Uploading image...');
       const uploadResponse = await fetch(`${apiBaseUrl}/upload-image`, {
         method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        }
+        body: formData
       });
       
       if (uploadResponse.ok) {
         const uploadResult = await uploadResponse.json();
+        console.log('Upload result:', uploadResult);
         if (uploadResult.filePath) {
           productData.image_url = uploadResult.filePath;
         }
+      } else {
+        console.error('Image upload failed:', await uploadResponse.text());
       }
-    } catch (error) {
-      console.error('Error uploading image:', error);
     }
-  }
-  
-  try {
+    
+    console.log('Saving product data:', productData);
+    
+    // Now save the product
     let url = `${apiBaseUrl}/product`;
     let method = 'POST';
     
@@ -511,14 +511,16 @@ async function saveProduct() {
     const response = await fetch(url, {
       method: method,
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(productData)
     });
     
+    const responseText = await response.text();
+    console.log('Server response:', responseText);
+    
     if (!response.ok) {
-      throw new Error(`HTTP error ${response.status}`);
+      throw new Error(`HTTP error ${response.status}: ${responseText}`);
     }
     
     // Reload products
@@ -534,7 +536,7 @@ async function saveProduct() {
     showToast('Success', isEdit ? 'Product updated successfully' : 'Product added successfully', 'success');
   } catch (error) {
     console.error('Error saving product:', error);
-    showToast('Error', 'Failed to save product', 'danger');
+    showToast('Error', 'Failed to save product: ' + error.message, 'danger');
   }
 }
 
