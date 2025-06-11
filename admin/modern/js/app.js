@@ -468,13 +468,20 @@ async function saveProduct() {
   const productData = {
     name: document.getElementById('product-name').value,
     price: parseFloat(document.getElementById('product-price').value),
-    category_id: document.getElementById('product-category').value || null,
     stock_quantity: parseInt(document.getElementById('product-stock').value) || 0,
     description: document.getElementById('product-description').value
   };
   
+  // Get category name instead of ID
+  const categorySelect = document.getElementById('product-category');
+  if (categorySelect.value) {
+    const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+    productData.category = selectedOption.text;
+    productData.category_id = categorySelect.value;
+  }
+  
   try {
-    // Handle image upload first
+    // Handle image upload
     const imageFile = document.getElementById('product-image').files[0];
     if (imageFile) {
       const formData = new FormData();
@@ -486,18 +493,20 @@ async function saveProduct() {
         body: formData
       });
       
-      if (uploadResponse.ok) {
-        const uploadResult = await uploadResponse.json();
-        console.log('Upload result:', uploadResult);
+      const uploadText = await uploadResponse.text();
+      console.log('Upload response:', uploadText);
+      
+      try {
+        const uploadResult = JSON.parse(uploadText);
         if (uploadResult.filePath) {
           productData.image_url = uploadResult.filePath;
         }
-      } else {
-        console.error('Image upload failed:', await uploadResponse.text());
+      } catch (e) {
+        console.error('Failed to parse upload response:', e);
       }
     }
     
-    console.log('Saving product data:', productData);
+    console.log('Saving product data:', JSON.stringify(productData));
     
     // Now save the product
     let url = `${apiBaseUrl}/product`;
@@ -523,16 +532,9 @@ async function saveProduct() {
       throw new Error(`HTTP error ${response.status}: ${responseText}`);
     }
     
-    // Reload products
     await loadProducts();
-    
-    // Close modal and update UI
     productModal.hide();
-    
-    // Update dashboard stats
     document.getElementById('products-count').textContent = productsData.length;
-    
-    // Show success message
     showToast('Success', isEdit ? 'Product updated successfully' : 'Product added successfully', 'success');
   } catch (error) {
     console.error('Error saving product:', error);
