@@ -53,6 +53,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Serve admin dashboard
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
+app.use('/admin/modern', express.static(path.join(__dirname, 'admin/modern')));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
