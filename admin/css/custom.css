@@ -38,14 +38,32 @@
     width: 100%;
     position: static !important;
     height: auto !important;
+    z-index: 1030;
   }
   
   .main-content {
     margin-left: 0 !important;
+    padding: 15px !important;
+    width: 100%;
   }
 
-  .login-form {
+  .form-container {
+    width: 90%;
+    max-width: 100%;
     padding: 15px;
+  }
+  
+  .admin-layout {
+    flex-direction: column;
+  }
+  
+  .top-navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .top-navbar .page-title {
+    margin-bottom: 10px;
   }
 }
 

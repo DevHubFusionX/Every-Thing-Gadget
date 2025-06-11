@@ -206,7 +206,7 @@ async function handleLogin(e) {
       localStorage.setItem('adminToken', data.token);
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('admin-panel').style.display = 'block';
-      loadProductsPanel();
+      loadProductsPanel(); // Load products immediately after login
       updateAuthNav(true);
     } else {
       // Show specific error message from server or default message
