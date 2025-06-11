@@ -405,6 +405,7 @@ function showProductModal(product = null) {
     document.getElementById('product-category').value = product.category_id || '';
     document.getElementById('product-stock').value = product.stock_quantity || 0;
     document.getElementById('product-description').value = product.description || '';
+    document.getElementById('product-sku').value = product.sku || '';
     
     // Show image preview if available
     if (product.image_url) {
@@ -469,7 +470,8 @@ async function saveProduct() {
     name: document.getElementById('product-name').value,
     price: parseFloat(document.getElementById('product-price').value),
     stock_quantity: parseInt(document.getElementById('product-stock').value) || 0,
-    description: document.getElementById('product-description').value
+    description: document.getElementById('product-description').value,
+    sku: document.getElementById('product-sku').value || `SKU-${Date.now()}`
   };
   
   // Get category name instead of ID
