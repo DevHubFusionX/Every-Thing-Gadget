@@ -180,11 +180,20 @@ function setActivePage(pageId) {
     if (page.id === pageId) {
       page.style.display = 'block';
       
-      // Always load fresh data when switching to a page
+      // Only load data if it hasn't been loaded yet or if it's been more than 5 minutes
+      const now = Date.now();
       if (pageId === 'products-content') {
-        loadProducts();
+        const lastProductsLoad = localStorage.getItem('lastProductsLoad');
+        if (!productsData.length || !lastProductsLoad || (now - parseInt(lastProductsLoad)) > 300000) {
+          loadProducts();
+          localStorage.setItem('lastProductsLoad', now.toString());
+        }
       } else if (pageId === 'categories-content') {
-        loadCategories();
+        const lastCategoriesLoad = localStorage.getItem('lastCategoriesLoad');
+        if (!categoriesData.length || !lastCategoriesLoad || (now - parseInt(lastCategoriesLoad)) > 300000) {
+          loadCategories();
+          localStorage.setItem('lastCategoriesLoad', now.toString());
+        }
       }
     } else {
       page.style.display = 'none';
@@ -216,15 +225,12 @@ async function loadProducts(silent = false) {
   }
   
   try {
-    // Use a direct URL to avoid any path issues
-    const fullUrl = 'https://every-thing-gadget.onrender.com/api/products';
-    console.log('Fetching products from:', fullUrl);
+    console.log('Fetching products from:', `${apiBaseUrl}/products`);
     
-    const response = await fetch(fullUrl, {
+    const response = await fetch(`${apiBaseUrl}/products`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache'
+        'Accept': 'application/json'
       }
     });
     
