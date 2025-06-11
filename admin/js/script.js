@@ -5,7 +5,7 @@ let currentProductId;
 let currentCategoryId;
 let categories = [];
 let productsData = []; // Store products data globally
-const apiBaseUrl = '/backend/api'; // Fixed path for production on render.com
+const apiBaseUrl = '/api'; // Fixed path for production on render.com
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
