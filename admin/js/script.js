@@ -5,7 +5,7 @@ let currentProductId;
 let currentCategoryId;
 let categories = [];
 let productsData = []; // Store products data globally
-const apiBaseUrl = '../api'; // Fixed path to point to the API directory relative to admin
+const apiBaseUrl = '/backend/api'; // Fixed path for production on render.com
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
@@ -196,6 +196,10 @@ async function handleLogin(e) {
       body: JSON.stringify({ username, password })
     });
     
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+    
     const data = await response.json();
     
     if (data.token) {
@@ -365,4 +369,194 @@ async function loadCategories() {
   } catch (error) {
     console.error('Error loading categories:', error);
   }
+}
+
+// Load the categories management panel
+function loadCategoriesPanel() {
+  setActiveNavItem('categories-nav');
+  const adminPanel = document.getElementById('admin-panel');
+  adminPanel.style.display = 'block';
+  adminPanel.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p>Loading categories...</p></div>';
+  
+  fetch(`${apiBaseUrl}/categories.php`)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(categoriesData => {
+      // Store categories globally
+      categories = categoriesData;
+      
+      adminPanel.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2>Categories Management</h2>
+          <button class="btn btn-success" id="add-category-btn">Add New Category</button>
+        </div>
+        <div id="alert-container"></div>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${categories.map(c => `
+                <tr>
+                  <td>${c.id}</td>
+                  <td>${c.name}</td>
+                  <td>${c.description || 'N/A'}</td>
+                  <td class="action-buttons">
+                    <button class="btn btn-sm btn-primary edit-category" data-id="${c.id}">Edit</button>
+                    <button class="btn btn-sm btn-danger delete-category" data-id="${c.id}" data-name="${c.name}">Delete</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      // Add event listeners
+      document.getElementById('add-category-btn').addEventListener('click', () => showCategoryModal());
+      document.querySelectorAll('.edit-category').forEach(btn => {
+        btn.addEventListener('click', () => editCategory(btn.dataset.id));
+      });
+      document.querySelectorAll('.delete-category').forEach(btn => {
+        btn.addEventListener('click', () => showDeleteCategoryModal(btn.dataset.id, btn.dataset.name));
+      });
+    })
+    .catch(err => {
+      adminPanel.innerHTML = `<div class="alert alert-danger">Error loading categories: ${err.message}</div>`;
+    });
+}
+
+// Render products table
+function renderProductsTable(products) {
+  const adminPanel = document.getElementById('admin-panel');
+  
+  adminPanel.innerHTML = `
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+      <h2 class="mb-3 mb-md-0">Products Management</h2>
+      <button class="btn btn-success" id="add-product-btn">
+        <i class="bi bi-plus-circle me-1"></i> Add New Product
+      </button>
+    </div>
+    <div class="row mb-3">
+      <div class="col-12 col-md-6">
+        <label for="category-filter" class="form-label">Filter by Category:</label>
+        <select class="form-select" id="category-filter">
+          <option value="">All Categories</option>
+          ${categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div id="alert-container"></div>
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th class="d-none d-md-table-cell">Category</th>
+            <th class="d-none d-md-table-cell">Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="products-table-body">
+          ${products.map(p => `
+            <tr>
+              <td>${p.id}</td>
+              <td>
+                <img src="${p.image_url || '/uploads/sample-phone.jpg'}" 
+                     alt="${p.name}" 
+                     class="product-image"
+                     onerror="this.src='/uploads/sample-phone.jpg'">
+              </td>
+              <td>${p.name}</td>
+              <td>${parseFloat(p.price).toFixed(2)}</td>
+              <td class="d-none d-md-table-cell">${p.category || 'N/A'}</td>
+              <td class="d-none d-md-table-cell">${p.stock_quantity || 0}</td>
+              <td class="action-buttons">
+                <button class="btn btn-sm btn-primary edit-product" data-id="${p.id}">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-sm btn-danger delete-product" data-id="${p.id}" data-name="${p.name}">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  // Add event listeners for the buttons
+  document.getElementById('add-product-btn').addEventListener('click', () => showProductModal());
+  document.querySelectorAll('.edit-product').forEach(btn => {
+    btn.addEventListener('click', () => editProduct(btn.dataset.id));
+  });
+  document.querySelectorAll('.delete-product').forEach(btn => {
+    btn.addEventListener('click', () => showDeleteModal(btn.dataset.id, btn.dataset.name));
+  });
+  
+  // Add event listener for image upload button
+  if (document.getElementById('upload-image-btn')) {
+    document.getElementById('upload-image-btn').addEventListener('click', uploadProductImage);
+  }
+  
+  // Add event listener for category filter
+  const categoryFilter = document.getElementById('category-filter');
+  if (categoryFilter) {
+    categoryFilter.addEventListener('change', filterProductsByCategory);
+  }
+}
+
+// Placeholder functions to prevent errors
+function showProductModal() {
+  showAlert('info', 'Product modal functionality coming soon');
+}
+
+function editProduct() {
+  showAlert('info', 'Edit product functionality coming soon');
+}
+
+function showDeleteModal() {
+  showAlert('info', 'Delete product functionality coming soon');
+}
+
+function saveProduct() {
+  showAlert('info', 'Save product functionality coming soon');
+}
+
+function deleteProduct() {
+  showAlert('info', 'Delete product functionality coming soon');
+}
+
+function uploadProductImage() {
+  showAlert('info', 'Upload image functionality coming soon');
+}
+
+function filterProductsByCategory() {
+  showAlert('info', 'Filter by category functionality coming soon');
+}
+
+function showCategoryModal() {
+  showAlert('info', 'Category modal functionality coming soon');
+}
+
+function editCategory() {
+  showAlert('info', 'Edit category functionality coming soon');
+}
+
+function showDeleteCategoryModal() {
+  showAlert('info', 'Delete category modal functionality coming soon');
 }
