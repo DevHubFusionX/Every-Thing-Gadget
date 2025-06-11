@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Set up event listeners
   document.getElementById('admin-login-form').addEventListener('submit', handleLogin);
-  document.getElementById('dashboard-nav').addEventListener('click', loadDashboard);
+  document.getElementById('dashboard-nav').addEventListener('click', loadProductsPanel); // Changed to products
   document.getElementById('products-nav').addEventListener('click', loadProductsPanel);
   document.getElementById('categories-nav').addEventListener('click', loadCategoriesPanel);
   document.getElementById('save-product').addEventListener('click', saveProduct);
@@ -66,8 +66,8 @@ function updateAuthNav(isLoggedIn) {
     // Show navigation items
     navItems.style.display = 'block';
     
-    // Load dashboard as default view
-    loadDashboard();
+    // Load products directly instead of dashboard
+    loadProductsPanel();
   } else {
     // Hide logout button
     authNav.innerHTML = '';
@@ -204,7 +204,9 @@ async function handleLogin(e) {
     
     if (data.token) {
       localStorage.setItem('adminToken', data.token);
-      document.getElementById('login-form').style.display = 'none';
+      // Completely remove login form from DOM
+      const loginForm = document.getElementById('login-form');
+      loginForm.parentNode.removeChild(loginForm);
       document.getElementById('admin-panel').style.display = 'block';
       loadProductsPanel(); // Load products immediately after login
       updateAuthNav(true);
