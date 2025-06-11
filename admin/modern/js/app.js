@@ -147,6 +147,21 @@ function handleLogout() {
 // Toggle sidebar on mobile
 function toggleSidebar() {
   sidebar.classList.toggle('show');
+  
+  // If sidebar is now shown, add click event to close when clicking outside
+  if (sidebar.classList.contains('show')) {
+    setTimeout(() => {
+      document.addEventListener('click', closeSidebarOnClickOutside);
+    }, 10);
+  }
+}
+
+// Close sidebar when clicking outside
+function closeSidebarOnClickOutside(event) {
+  if (!sidebar.contains(event.target) && !event.target.matches('#sidebar-toggle')) {
+    sidebar.classList.remove('show');
+    document.removeEventListener('click', closeSidebarOnClickOutside);
+  }
 }
 
 // Set active page in the dashboard
@@ -216,7 +231,9 @@ async function loadProducts(silent = false) {
       throw new Error(`HTTP error ${response.status}`);
     }
     
-    productsData = await response.json();
+    const data = await response.json();
+    // Ensure productsData is always an array
+    productsData = Array.isArray(data) ? data : (data.products || []);
     
     if (!silent) {
       renderProducts();
@@ -299,7 +316,9 @@ async function loadCategories(silent = false) {
       throw new Error(`HTTP error ${response.status}`);
     }
     
-    categoriesData = await response.json();
+    const data = await response.json();
+    // Ensure categoriesData is always an array
+    categoriesData = Array.isArray(data) ? data : (data.categories || []);
     
     if (!silent) {
       renderCategories();
