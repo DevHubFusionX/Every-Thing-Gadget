@@ -281,10 +281,17 @@ function renderProducts() {
     return;
   }
   
-  productsTableBody.innerHTML = productsData.map(product => `
+  productsTableBody.innerHTML = productsData.map(product => {
+    // Ensure image URL is complete
+    let imageUrl = product.image_url || 'https://via.placeholder.com/50';
+    if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
+      imageUrl = window.location.origin + imageUrl;
+    }
+    
+    return `
     <tr>
       <td>
-        <img src="${product.image_url || 'https://via.placeholder.com/50'}" 
+        <img src="${imageUrl}" 
              alt="${product.name}" 
              class="img-thumbnail" 
              style="width: 50px; height: 50px; object-fit: cover;">
@@ -430,7 +437,12 @@ function showProductModal(product = null) {
     
     // Show image preview if available
     if (product.image_url) {
-      imagePreview.querySelector('img').src = product.image_url;
+      // Ensure image URL is complete
+      let imageUrl = product.image_url;
+      if (!imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
+        imageUrl = window.location.origin + imageUrl;
+      }
+      imagePreview.querySelector('img').src = imageUrl;
       imagePreview.style.display = 'block';
     }
   } else {
@@ -522,7 +534,10 @@ async function saveProduct() {
       try {
         const uploadResult = JSON.parse(uploadText);
         if (uploadResult.filePath) {
-          productData.image_url = uploadResult.filePath;
+          // Store the complete URL to ensure it's accessible
+          const baseUrl = window.location.origin;
+          productData.image_url = baseUrl + uploadResult.filePath;
+          console.log('Image URL saved:', productData.image_url);
         }
       } catch (e) {
         console.error('Failed to parse upload response:', e);
