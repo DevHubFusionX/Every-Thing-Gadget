@@ -1,0 +1,136 @@
+/* Simple Admin CSS */
+:root {
+  --primary: #0f766e;
+  --secondary: #0e7490;
+  --light-bg: #f8f9fa;
+  --dark-text: #333;
+  --border-radius: 6px;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background-color: var(--light-bg);
+  margin: 0;
+  padding: 0;
+}
+
+.admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.admin-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.admin-user {
+  display: flex;
+  align-items: center;
+}
+
+.admin-user-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.admin-logout {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.admin-logout:hover {
+  text-decoration: underline;
+}
+
+.admin-content {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 20px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  background-color: var(--primary);
+  color: white;
+  text-align: left;
+  padding: 12px 15px;
+}
+
+.admin-table td {
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.admin-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+.admin-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.admin-btn:hover {
+  background-color: var(--secondary);
+}
+
+.admin-btn-danger {
+  background-color: #dc3545;
+}
+
+.admin-btn-danger:hover {
+  background-color: #c82333;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .admin-user {
+    margin-top: 10px;
+  }
+  
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .admin-table th, 
+  .admin-table td {
+    padding: 8px 10px;
+  }
+}

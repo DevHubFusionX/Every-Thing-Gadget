@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Everything-Tech Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/simple-admin.css">
+</head>
+<body>
+  <!-- Login Container -->
+  <div id="login-container" class="d-flex align-items-center justify-content-center" style="min-height: 100vh; background-color: #f8f9fa;">
+    <div class="card shadow" style="width: 400px; max-width: 90%;">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Everything-Tech Admin</h4>
+      </div>
+      <div class="card-body p-4">
+        <form id="admin-login-form">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" required>
+          </div>
+          <div class="alert alert-danger" id="login-error" style="display: none;"></div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Login</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="admin-panel" style="display: none;">
+    <div class="admin-header">
+      <div class="admin-title">Everything-Tech Admin</div>
+      <div class="admin-user">
+        <div class="admin-user-icon">A</div>
+        <div>
+          <div>Admin</div>
+          <a href="#" id="admin-logout" class="admin-logout">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-container">
+      <div class="admin-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2>Products</h2>
+          <button id="add-product-btn" class="admin-btn">Add Product</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="products-list">
+              <!-- Products will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/simple-admin.js"></script>
+</body>
+</html>
