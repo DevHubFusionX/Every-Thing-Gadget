@@ -190,7 +190,7 @@ async function handleLogin(e) {
   loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging in...';
   
   try {
-    const response = await fetch(`${apiBaseUrl}/login.php`, {
+    const response = await fetch(`${apiBaseUrl}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
@@ -328,7 +328,7 @@ async function loadProductsPanel() {
     }
     
     // Load products
-    const response = await fetch(`${apiBaseUrl}/products.php`);
+    const response = await fetch(`${apiBaseUrl}/products`);
     if (!response.ok) {
       throw new Error(`HTTP error ${response.status}`);
     }
@@ -349,7 +349,7 @@ async function loadProductsPanel() {
 // Load categories for the dropdown
 async function loadCategories() {
   try {
-    const response = await fetch(`${apiBaseUrl}/categories.php`);
+    const response = await fetch(`${apiBaseUrl}/categories`);
     if (!response.ok) {
       throw new Error(`HTTP error ${response.status}`);
     }
@@ -378,7 +378,7 @@ function loadCategoriesPanel() {
   adminPanel.style.display = 'block';
   adminPanel.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p>Loading categories...</p></div>';
   
-  fetch(`${apiBaseUrl}/categories.php`)
+  fetch(`${apiBaseUrl}/categories`)
     .then(res => {
       if (!res.ok) {
         throw new Error(`HTTP error ${res.status}`);
