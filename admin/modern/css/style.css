@@ -159,6 +159,7 @@ body {
   margin-left: 250px;
   padding: 1rem;
   transition: var(--transition);
+  width: calc(100% - 250px);
 }
 
 .top-navbar {
@@ -334,6 +335,7 @@ body {
   
   .main-content {
     margin-left: 0;
+    width: 100%;
   }
   
   #sidebar-toggle {
