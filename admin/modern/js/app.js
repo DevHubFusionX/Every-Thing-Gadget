@@ -276,10 +276,10 @@ function renderProducts() {
       <td>${product.stock_quantity || 0}</td>
       <td>${getCategoryName(product.category_id) || 'N/A'}</td>
       <td>
-        <button class="btn btn-sm btn-primary me-1" onclick="editProduct(${product.id})">
+        <button class="btn btn-sm btn-primary me-1" onclick="window.editProduct(${product.id})">
           <i class="bi bi-pencil"></i>
         </button>
-        <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id}, '${product.name}')">
+        <button class="btn btn-sm btn-danger" onclick="window.deleteProduct(${product.id}, '${product.name.replace(/'/g, "\\'").replace(/"/g, '\\"')}')">
           <i class="bi bi-trash"></i>
         </button>
       </td>
@@ -356,10 +356,10 @@ function renderCategories() {
       <td>${category.name}</td>
       <td>${category.description || 'N/A'}</td>
       <td>
-        <button class="btn btn-sm btn-primary me-1" onclick="editCategory(${category.id})">
+        <button class="btn btn-sm btn-primary me-1" onclick="window.editCategory(${category.id})">
           <i class="bi bi-pencil"></i>
         </button>
-        <button class="btn btn-sm btn-danger" onclick="deleteCategory(${category.id}, '${category.name}')">
+        <button class="btn btn-sm btn-danger" onclick="window.deleteCategory(${category.id}, '${category.name.replace(/'/g, "\\'").replace(/"/g, '\\"')}')">
           <i class="bi bi-trash"></i>
         </button>
       </td>
@@ -711,10 +711,10 @@ function showToast(title, message, type = 'primary') {
   toast.show();
 }
 
-// No longer needed email validation
-
 // Make functions available globally
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.editCategory = editCategory;
 window.deleteCategory = deleteCategory;
+window.showProductModal = showProductModal;
+window.showCategoryModal = showCategoryModal;
