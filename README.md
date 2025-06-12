@@ -1,69 +1,82 @@
-# Everything-Tech Backend API
+# Everything-Tech Backend
 
-This is a RESTful API for the Everything-Tech e-commerce website built with Express.js and MySQL.
-
-## Features
-
-- RESTful API endpoints for products and categories
-- Token-based authentication
-- MySQL database integration
-- JSON responses
-- CORS support
-- Environment variable configuration
-
-## API Endpoints
-
-### Products
-- `GET /api/products` – Get all products with filtering, sorting, and pagination
-- `GET /api/product/:id` – Get a specific product
-- `POST /api/product` – Add a new product
-- `PUT /api/product/:id` – Update a product
-- `DELETE /api/product/:id` – Delete a product
-
-### Categories
-- `GET /api/categories` – Get all categories
-- `GET /api/products-by-category/:id` – Get products by category
-- `POST /api/category` – Add a new category
-- `PUT /api/category/:id` – Update a category
-- `DELETE /api/category/:id` – Delete a category
-
-### Authentication
-- `POST /api/login` – Authenticate and get API token
-- `POST /api/create-admin` – Create an admin user
+Backend API for Everything-Tech e-commerce site.
 
 ## Setup
-
-### Local Development
 
 1. Install dependencies:
    ```
    npm install
    ```
 
-2. Create a `.env` file with the following variables:
+2. Create a `.env` file based on `.env.example` and fill in your database and Cloudinary credentials:
    ```
-   DB_HOST=your_database_host
-   DB_NAME=your_database_name
-   DB_USER=your_database_user
-   DB_PASSWORD=your_database_password
+   # Database Configuration
+   DB_HOST=localhost
+   DB_USER=your_db_user
+   DB_PASSWORD=your_db_password
+   DB_NAME=everything_tech
+
+   # Server Configuration
    PORT=3000
+
+   # Cloudinary Configuration
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
    ```
 
-3. Start the development server:
+3. Run the database migrations:
+   ```
+   mysql -u your_db_user -p your_db_name < database/products.sql
+   mysql -u your_db_user -p your_db_name < database/update_cloudinary.sql
+   ```
+
+4. Start the server:
+   ```
+   npm start
+   ```
+   
+   For development with auto-reload:
    ```
    npm run dev
    ```
 
-### Deployment on Render
+## API Endpoints
 
-1. Create a new Web Service on Render
-2. Connect your GitHub repository
-3. Use the following settings:
-   - Build Command: `npm install`
-   - Start Command: `npm start`
-4. Add the environment variables in the Render dashboard
-5. Deploy!
+### Products
 
-## Database Setup
+- `GET /api/products` - Get all products with filtering, sorting, pagination
+- `GET /api/product/:id` - Get a specific product
+- `POST /api/product` - Add a new product
+- `PUT /api/product/:id` - Update a product
+- `DELETE /api/product/:id` - Delete a product
 
-Import the database schema from the `database/products.sql` file into your MySQL server.
+### Image Upload
+
+- `POST /api/upload-image` - Upload an image to Cloudinary
+  - Request: Form data with 'image' field
+  - Response: 
+    ```json
+    {
+      "success": true,
+      "imageUrl": "https://res.cloudinary.com/your-cloud/image/upload/v1234/products/image.jpg",
+      "public_id": "products/image",
+      "message": "Image uploaded successfully to Cloudinary"
+    }
+    ```
+
+## Cloudinary Integration
+
+This project uses Cloudinary for image storage. When uploading product images:
+
+1. Images are temporarily stored on the server
+2. Uploaded to Cloudinary
+3. Local temporary files are deleted
+4. Cloudinary URL and public_id are returned and stored in the database
+
+Benefits:
+- Optimized image delivery
+- Automatic image transformations
+- CDN distribution
+- Secure storage

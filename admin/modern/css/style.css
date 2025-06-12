@@ -161,7 +161,8 @@ body {
   transition: var(--transition);
   width: calc(100% - 250px);
 }
-;.top-navbar {
+
+.top-navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;

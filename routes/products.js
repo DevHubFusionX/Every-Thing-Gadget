@@ -4,8 +4,9 @@ const { pool } = require('../config/db');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { uploadToCloudinary } = require('../utils/cloudinaryUpload');
 
-// Configure multer storage
+// Configure multer storage for temporary file storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, '../uploads');
@@ -37,21 +38,22 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-// Image upload route
-router.post('/upload-image', upload.single('image'), (req, res) => {
+// Image upload route with Cloudinary
+router.post('/upload-image', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: true, message: 'No file uploaded' });
     }
     
-    // Return the file path that can be stored in the product's image_url
-    const filename = path.basename(req.file.path);
-    const filePath = `/uploads/${filename}`;
+    // Upload to Cloudinary
+    const result = await uploadToCloudinary(req.file.path);
     
     res.json({
       success: true,
-      filePath: filePath,
-      message: 'Image uploaded successfully'
+      imageUrl: result.url,
+      public_id: result.public_id,
+      message: 'Image uploaded successfully to Cloudinary',
+      verifyUrl: `/test-cloudinary?public_id=${encodeURIComponent(result.public_id)}`
     });
   } catch (error) {
     res.status(500).json({ error: true, message: error.message });
@@ -164,7 +166,7 @@ router.get('/product/:id', async (req, res) => {
 // POST create a new product
 router.post('/product', async (req, res) => {
   try {
-    const { name, description, price, category, stock_quantity, sku, image_url } = req.body;
+    const { name, description, price, category, stock_quantity, sku, image_url, cloudinary_id } = req.body;
     
     if (!name || !price) {
       return res.status(400).json({ error: true, message: 'Missing required fields' });
@@ -180,8 +182,8 @@ router.post('/product', async (req, res) => {
     }
     
     const [result] = await pool.query(
-      'INSERT INTO products (name, description, price, category, category_id, stock_quantity, sku, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [name, description || '', price, category || '', categoryId, stock_quantity || 0, sku || '', image_url || null]
+      'INSERT INTO products (name, description, price, category, category_id, stock_quantity, sku, image_url, cloudinary_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [name, description || '', price, category || '', categoryId, stock_quantity || 0, sku || '', image_url || null, cloudinary_id || null]
     );
     
     res.status(201).json({
@@ -196,7 +198,7 @@ router.post('/product', async (req, res) => {
 // PUT update a product
 router.put('/product/:id', async (req, res) => {
   try {
-    const { name, description, price, category, stock_quantity, sku, image_url } = req.body;
+    const { name, description, price, category, stock_quantity, sku, image_url, cloudinary_id } = req.body;
     const id = req.params.id;
     
     if (!name || !price) {
@@ -213,8 +215,8 @@ router.put('/product/:id', async (req, res) => {
     }
     
     await pool.query(
-      'UPDATE products SET name = ?, description = ?, price = ?, category = ?, category_id = ?, stock_quantity = ?, sku = ?, image_url = ? WHERE id = ?',
-      [name, description || '', price, category || '', categoryId, stock_quantity || 0, sku || '', image_url || null, id]
+      'UPDATE products SET name = ?, description = ?, price = ?, category = ?, category_id = ?, stock_quantity = ?, sku = ?, image_url = ?, cloudinary_id = ? WHERE id = ?',
+      [name, description || '', price, category || '', categoryId, stock_quantity || 0, sku || '', image_url || null, cloudinary_id || null, id]
     );
     
     res.json({ message: 'Product updated successfully' });
