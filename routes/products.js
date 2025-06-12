@@ -52,8 +52,7 @@ router.post('/upload-image', upload.single('image'), async (req, res) => {
       success: true,
       imageUrl: result.url,
       public_id: result.public_id,
-      message: 'Image uploaded successfully to Cloudinary',
-      verifyUrl: `/test-cloudinary?public_id=${encodeURIComponent(result.public_id)}`
+      message: 'Image uploaded successfully to Cloudinary'
     });
   } catch (error) {
     res.status(500).json({ error: true, message: error.message });
