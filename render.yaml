@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: everything-tech-backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: DB_HOST
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+    
+  - type: web
+    name: everything-tech-frontend
+    env: static
+    buildCommand: cd Everthing-Tech && npm install && npm run build
+    staticPublishPath: ./Everthing-Tech/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
