@@ -282,11 +282,8 @@ function renderProducts() {
   }
   
   productsTableBody.innerHTML = productsData.map(product => {
-    // Ensure image URL is complete
+    // Use Cloudinary URL or fallback to placeholder
     let imageUrl = product.image_url || 'https://via.placeholder.com/50';
-    if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
-      imageUrl = window.location.origin + imageUrl;
-    }
     
     return `
     <tr>
@@ -438,12 +435,8 @@ function showProductModal(product = null) {
     
     // Show image preview if available
     if (product.image_url) {
-      // Ensure image URL is complete
-      let imageUrl = product.image_url;
-      if (!imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
-        imageUrl = window.location.origin + imageUrl;
-      }
-      imagePreview.querySelector('img').src = imageUrl;
+      // Use Cloudinary URL directly
+      imagePreview.querySelector('img').src = product.image_url;
       imagePreview.style.display = 'block';
     }
   } else {
@@ -523,7 +516,7 @@ async function saveProduct() {
       const formData = new FormData();
       formData.append('image', imageFile);
       
-      console.log('Uploading image...');
+      console.log('Uploading image to Cloudinary...');
       const uploadResponse = await fetch(`${apiBaseUrl}/upload-image`, {
         method: 'POST',
         body: formData
@@ -534,11 +527,11 @@ async function saveProduct() {
       
       try {
         const uploadResult = JSON.parse(uploadText);
-        if (uploadResult.filePath) {
-          // Store the complete URL to ensure it's accessible
-          const baseUrl = window.location.origin;
-          productData.image_url = baseUrl + uploadResult.filePath;
-          console.log('Image URL saved:', productData.image_url);
+        if (uploadResult.imageUrl) {
+          // Store the Cloudinary URL
+          productData.image_url = uploadResult.imageUrl;
+          productData.cloudinary_id = uploadResult.public_id;
+          console.log('Cloudinary image URL saved:', productData.image_url);
         }
       } catch (e) {
         console.error('Failed to parse upload response:', e);
