@@ -3,10 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { pool, testConnection } = require('./config/db');
-// Initialize Cloudinary
-require('./config/cloudinary');
-// Import migrations
-const { runMigrations } = require('./config/migrations');
+
+// Initialize Cloudinary directly instead of requiring the module
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,6 +56,15 @@ app.use('/api', productsRouter);
 app.use('/api', categoriesRouter);
 app.use('/api', authRouter);
 
+// Add Cloudinary verification route
+const cloudinaryRouter = require('./routes/cloudinary');
+app.use('/api/cloudinary', cloudinaryRouter);
+
+// Add test page for Cloudinary verification
+app.get('/test-cloudinary', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views/cloudinary-test.html'));
+});
+
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -65,13 +78,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!', message: err.message });
 });
 
-// Add Cloudinary verification route
-const cloudinaryRouter = require('./routes/cloudinary');
-app.use('/api/cloudinary', cloudinaryRouter);
-
-// Add Cloudinary test page and API
-const cloudinaryTestRouter = require('./routes/cloudinary-test');
-app.use('/cloudinary-test', cloudinaryTestRouter);
+// Import migrations
+const { runMigrations } = require('./config/migrations');
 
 // Start the server
 app.listen(PORT, async () => {

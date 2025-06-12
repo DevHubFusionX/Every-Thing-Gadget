@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const cloudinary = require('../config/cloudinary');
 const path = require('path');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 
 // Serve the test page
 router.get('/', (req, res) => {
