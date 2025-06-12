@@ -2,7 +2,7 @@ services:
   - type: web
     name: everything-tech-backend
     env: node
-    buildCommand: cd backend && npm install
+    buildCommand: cd backend && chmod +x render-build.sh && ./render-build.sh && npm install
     startCommand: cd backend && npm start
     envVars:
       - key: DB_HOST
