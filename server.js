@@ -59,6 +59,11 @@ app.use('/api', authRouter);
 // Cloudinary is configured at the top of the file
 // No test routes needed
 
+// Root route - redirect to admin dashboard
+app.get('/', (req, res) => {
+  res.redirect('/admin/modern');
+});
+
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
