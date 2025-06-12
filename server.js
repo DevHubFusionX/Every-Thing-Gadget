@@ -56,14 +56,8 @@ app.use('/api', productsRouter);
 app.use('/api', categoriesRouter);
 app.use('/api', authRouter);
 
-// Add Cloudinary verification route
-const cloudinaryRouter = require('./routes/cloudinary');
-app.use('/api/cloudinary', cloudinaryRouter);
-
-// Add test page for Cloudinary verification
-app.get('/test-cloudinary', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views/cloudinary-test.html'));
-});
+// Cloudinary is configured at the top of the file
+// No test routes needed
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
