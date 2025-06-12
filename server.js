@@ -3,6 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { pool, testConnection } = require('./config/db');
+// Initialize Cloudinary
+require('./config/cloudinary');
+// Import migrations
+const { runMigrations } = require('./config/migrations');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,10 +65,20 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!', message: err.message });
 });
 
+// Add Cloudinary verification route
+const cloudinaryRouter = require('./routes/cloudinary');
+app.use('/api/cloudinary', cloudinaryRouter);
+
+// Add Cloudinary test page and API
+const cloudinaryTestRouter = require('./routes/cloudinary-test');
+app.use('/cloudinary-test', cloudinaryTestRouter);
+
 // Start the server
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   await testConnection();
+  // Run database migrations
+  await runMigrations();
 });
 
 module.exports = { app };

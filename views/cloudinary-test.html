@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cloudinary Test Page</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .result { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+    button { padding: 10px 15px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #45a049; }
+    .success { color: green; }
+    .error { color: red; }
+    img { max-width: 100%; max-height: 300px; }
+    input[type="text"] { width: 100%; padding: 8px; margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>Cloudinary Integration Test</h1>
+  
+  <div class="card">
+    <h2>1. Test Connection</h2>
+    <p>Test your Cloudinary connection and upload a sample image.</p>
+    <button id="testConnection">Run Connection Test</button>
+    <div class="result" id="connectionResult">Click the button to test your connection.</div>
+  </div>
+  
+  <div class="card">
+    <h2>2. Verify Image</h2>
+    <p>Check if an image exists in your Cloudinary account.</p>
+    <div>
+      <label for="public_id">Public ID:</label>
+      <input type="text" id="public_id" placeholder="products/abc123">
+    </div>
+    <div>
+      <label for="imageUrl">OR Cloudinary URL:</label>
+      <input type="text" id="imageUrl" placeholder="https://res.cloudinary.com/your-cloud-name/image/upload/v1234/products/abc123.jpg">
+    </div>
+    <button id="verifyImage" style="margin-top: 10px;">Verify Image</button>
+    <div class="result" id="verifyResult">Enter a public ID or URL and click verify.</div>
+  </div>
+
+  <script>
+    // Test connection
+    document.getElementById('testConnection').addEventListener('click', async () => {
+      const resultDiv = document.getElementById('connectionResult');
+      resultDiv.innerHTML = 'Testing connection...';
+      
+      try {
+        const response = await fetch('/cloudinary-test/api/test');
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.innerHTML = `
+            <p class="success">✅ Connection successful!</p>
+            <p>Status: ${data.connection.status}</p>
+            <p>Test image uploaded successfully:</p>
+            <p><strong>Public ID:</strong> ${data.upload.public_id}</p>
+            <img src="${data.upload.url}" alt="Test image">
+          `;
+        } else {
+          resultDiv.innerHTML = `<p class="error">❌ Test failed: ${data.error}</p>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+      }
+    });
+    
+    // Verify image
+    document.getElementById('verifyImage').addEventListener('click', async () => {
+      const resultDiv = document.getElementById('verifyResult');
+      const publicId = document.getElementById('public_id').value;
+      const imageUrl = document.getElementById('imageUrl').value;
+      
+      if (!publicId && !imageUrl) {
+        resultDiv.innerHTML = '<p class="error">Please enter either a Public ID or URL</p>';
+        return;
+      }
+      
+      resultDiv.innerHTML = 'Verifying image...';
+      
+      try {
+        const params = new URLSearchParams();
+        if (publicId) params.append('public_id', publicId);
+        if (imageUrl) params.append('url', imageUrl);
+        
+        const response = await fetch('/api/cloudinary/verify-image?' + params.toString());
+        const data = await response.json();
+        
+        if (data.exists) {
+          resultDiv.innerHTML = `
+            <p class="success">✅ Image found in Cloudinary!</p>
+            <p><strong>Public ID:</strong> ${data.details.public_id}</p>
+            <p><strong>Format:</strong> ${data.details.format}</p>
+            <p><strong>Created:</strong> ${new Date(data.details.created_at).toLocaleString()}</p>
+            <img src="${data.details.url}" alt="Verified image">
+          `;
+        } else {
+          resultDiv.innerHTML = `<p class="error">❌ Image not found: ${data.message}</p>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
